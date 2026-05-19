@@ -73,7 +73,7 @@ function WeekStrip({
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {week.map((dateStr, i) => {
+        {week.map((dateStr) => {
           const d = new Date(dateStr + 'T00:00:00')
           const isSelected = dateStr === selectedDate
           const isToday = dateStr === TODAY
@@ -173,10 +173,7 @@ export function HistoryPage() {
   const { habits, loading: habitsLoading } = useHabits()
   const { logByHabit, logs, loading: logsLoading } = useDayLogs(selectedDate)
 
-  // For dot indicators: fetch logs counts for the visible week
-  const week = getWeek(selectedDate)
   const logCountByDate = new Map<string, number>()
-  // We can derive counts from logs in the current day only; dots update lazily on day change
   if (logs.length > 0) logCountByDate.set(selectedDate, logs.length)
 
   function prevWeek() {
