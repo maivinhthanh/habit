@@ -11,6 +11,7 @@ export function useHabits() {
     const { data } = await supabase
       .from('habit_stats')
       .select('*')
+      .eq('is_active', true)
       .order('name')
     setHabits(data ?? [])
     setLoading(false)
@@ -65,5 +66,11 @@ export function useHabits() {
     return error
   }
 
-  return { habits, loading, checkIn, addHabit, updateHabit, refetch: fetch }
+  async function deleteHabit(id: string) {
+    const { error } = await supabase.from('habits').update({ is_active: false }).eq('id', id)
+    if (!error) fetch()
+    return error
+  }
+
+  return { habits, loading, checkIn, addHabit, updateHabit, deleteHabit, refetch: fetch }
 }

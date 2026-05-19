@@ -106,5 +106,11 @@ export interface Database {
       reward_progress: { Row: RewardProgress }
       current_points: { Row: CurrentPoints }
     }
+    Functions: {
+      claim_reward: {
+        Args: { p_reward_id: string }
+        Returns: { error: string | null; points_spent?: number }
+      }
+    }
   }
 }

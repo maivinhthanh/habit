@@ -30,7 +30,7 @@ export function AddRewardPage() {
       target_date: targetDate || null,
     })
     setLoading(false)
-    if (err) setError(err.message)
+    if (err) setError(`${err.message}${err.details ? ' — ' + err.details : ''}${err.hint ? ' (' + err.hint + ')' : ''}`)
     else navigate('/rewards')
   }
 

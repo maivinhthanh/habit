@@ -10,7 +10,6 @@ export function useRewards() {
     const { data } = await supabase
       .from('reward_progress')
       .select('*')
-      .eq('is_active', true)
       .order('name')
     setRewards(data ?? [])
     setLoading(false)
@@ -19,26 +18,17 @@ export function useRewards() {
   useEffect(() => { fetch() }, [fetch])
 
   async function claimReward(reward: RewardProgress) {
-    if (reward.available_points < reward.points_required) return { error: 'not enough points' }
-    if (reward.is_claimed) return { error: 'already claimed' }
-
-    const { error: claimError } = await supabase.from('reward_claims').insert({
-      reward_id: reward.id,
-      points_spent: reward.points_required,
-      claimed_at: new Date().toISOString(),
-    })
-    if (claimError) return { error: claimError.message }
-
-    const { error: rewardError } = await supabase.from('rewards').update({ is_claimed: true }).eq('id', reward.id)
-    if (rewardError) return { error: rewardError.message }
-
+    const { data, error } = await supabase.rpc('claim_reward', { p_reward_id: reward.id })
+    if (error) return { error: error.message }
+    if (data?.error) return { error: data.error as string }
     await fetch()
     return { error: null }
   }
 
   async function addReward(input: Omit<Reward, 'id' | 'created_at' | 'is_active' | 'is_claimed'>) {
     const { error } = await supabase.from('rewards').insert({ ...input, is_active: true, is_claimed: false })
-    if (!error) fetch()
+    if (error) console.error('addReward error:', JSON.stringify(error))
+    else fetch()
     return error
   }
 
@@ -48,5 +38,11 @@ export function useRewards() {
     return error
   }
 
-  return { rewards, loading, claimReward, addReward, updateReward, refetch: fetch }
+  async function deleteReward(id: string) {
+    const { error } = await supabase.from('rewards').delete().eq('id', id)
+    if (!error) fetch()
+    return error
+  }
+
+  return { rewards, loading, claimReward, addReward, updateReward, deleteReward, refetch: fetch }
 }
